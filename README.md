@@ -7,7 +7,7 @@ After running the first step on SLURM, the workflow will process the raw coverag
 
 Two metadata files are required to execute this script: 1) a sample table that contains the prefix of the fastq files (the pair-end reads must share the same prefix) and the label of the samples. The exmpale sample table is in `resources/example_sample_table.csv`. 2) a configuration file that contains all the other required information. The example configuration file is in `config/example_config.yaml`.
 
-The script provides the chromosome size table for T2T v1.1 and Hg39 assemlby in `resources/`. The three columns are Chromosome Name (chosen by users for downstream analysis), Sequence Name (in reference fasta files), and the size of the chromosome.
+The script provides the chromosome size table for T2T v1.1 and Hg38 assemlby in `resources/`. The three columns are Chromosome Name (chosen by users for downstream analysis), Sequence Name (in reference fasta files), and the size of the chromosome.
 
 The workflow will generate one SQLite data for all samples and BigWig files for each sample. The SQLite database is stored in {gatc_db} specified in the configuration file. The BigWig files are stored in the {bw_prefix}.Filter_{sample-name}.bw specified in the configuration file. 
 
