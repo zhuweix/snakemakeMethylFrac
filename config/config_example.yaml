@@ -1,0 +1,39 @@
+# bowtie parameters
+bowtie2_maxinsert: 1000 # Maximum fragment size
+bowtie2_time: "12:00:00" # Maximum time for SLURM scripts 
+bowtie2_index: t2t_v11 # Name of the Bowtie2 index
+
+# reference genome
+reference_file: CHM13v1.1_genomic.fa # fasta file for the reference genome
+reference_size: resources/t2t_chrom_size.tsv # chromosome size table of reference genome
+
+# slurm jobname
+jobname: example # Name of the job in SLURM
+# Data analysis settings
+data:
+  # prefix for output summary and figures
+  prefix: example # Prefix for output files
+  # input directory for fastq files
+  input_dir: path/to/fastq/files
+  # output directory for bam files
+  output_dir: path/to/output-bam-files
+  # suffix for read1
+  suffix1: _R1_001.fastq.gz
+  # suffix for read2
+  suffix2: _R2_001.fastq.gz
+  # Sample sheet with prefix of fastq files and user-defined sample names
+  sample_sheet: resources/example_sample_sheet.tsv
+  # GATC database of samples
+  gatc_db: path/to/output-sqlite-database.db
+  # Filter for adjacent GATC sites
+  # Adjacent GATC sites are filtered since read fragments have a lower
+  # limit and the methylated fraction will be underestimated for adjacent sites.
+  # With the default parameter, the pair of half GATC sites with distances < 150 bp are filtered.
+  filter_size: 150
+  # Filter for overlapping CpG: True/False
+  # CpG methylation impairs DpnI digestion
+  # True for samples with native CpG methylation, such as human samples
+  # False for samples without native CpG methylation
+  filter_overlap: True
+  # BigWig prefix
+  bw_prefix: path/to/output-bigwig-files

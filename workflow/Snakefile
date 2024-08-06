@@ -1,0 +1,144 @@
+prefix=config["data"]["prefix"]
+rule all:
+    input:
+        "logs/{}_process_bw.done".format(prefix),
+        "logs/{}_plot_gatc_half_digestion.done".format(prefix)
+
+# Generate the slurm scripts for read alignment and read counting.
+
+rule make_slurm_script:
+    input:
+        input_dir=config["data"]["input_dir"],
+    params:
+        ref_index=config["bowtie2_index"],
+        output_dir=config["data"]["output_dir"],
+        suffix1=config["data"]["suffix1"],
+        suffix2=config["data"]["suffix2"],
+        jobname=config["jobname"],
+        maxinsert=config["bowtie2_maxinsert"],
+        jobtime=config["bowtie2_time"],
+    output: 
+        "results/slurm/{}_slurm_script_files.txt".format(prefix)
+    log:
+        "logs/{}_make_slurm_script.log".format(prefix)
+    script:
+        "scripts/make_slurm_script.py"
+
+# Run the slurm scripts for read alignment and read counting.
+
+rule run_slurm_script:
+    input:
+        "results/slurm/{}_slurm_script_files.txt".format(prefix)
+    log:
+        "logs/{}_run_slurm_script.log".format(prefix)
+    run:
+        with open(input[0]) as f:
+            for fn in f:
+                fn = fn.strip()
+                print(fn)
+                os.system(f'sbatch {fn}')
+
+# Build the GATC database for the reference genome.
+
+rule build_gatc_db:
+    input:
+        ref_size_sheet=config["reference_size"],
+        ref_file=config["reference_file"],
+    log:
+        "logs/{}_build_gatc_db.log".format(prefix)
+    output:
+        config["data"]["gatc_db"],
+        touch("logs/{}_build_gatc_db.done".format(prefix))
+    script:
+        "scripts/make_gatc_db.py"   
+
+# Process the bam files to get the Methylated Fractions at GATC sites.
+
+rule process_bam_coverage:
+    input: 
+        "logs/{}_build_gatc_db.done".format(prefix)
+    params:
+        bamdir=config["data"]["output_dir"],
+        chrom_size=config["reference_size"],
+    output:
+        touch("logs/{}_process_bam_coverage.done".format(prefix))
+    log:
+        "logs/{}_process_bam_coverage.log".format(prefix)
+    script:
+        "scripts/process_bam_coverage.py"
+
+# Load the GATC digestion sites to the database.
+
+rule load_gatc_digestion_to_db:
+    input:
+        "logs/{}_process_bam_coverage.done".format(prefix)
+    params:
+        chrom_size=config["reference_size"],    
+        data_db=config["data"]["gatc_db"],
+        bamdir=config["data"]["output_dir"],    
+        sample_sheet=config["data"]["sample_sheet"],
+    output:
+        touch("logs/{}_load_gatc_digestion_to_db.done".format(prefix))
+    log:
+        "logs/{}_load_gatc_digestion_to_db.log".format(prefix)
+    script:
+        "scripts/load_gatc_digestion_to_db.py"
+
+# Plot the Methylation Fraction (measured by DpnI digestion)
+# in half-GATC sites.
+# The read occupancy is also plotted.
+
+rule plot_gatc_half_digestion:
+    input:
+        "logs/{}_load_gatc_digestion_to_db.done".format(prefix),
+    params:
+        filter_size=config["data"]["filter_size"],
+        data_db=config["data"]["gatc_db"],
+        sample_sheet=config["data"]["sample_sheet"],
+        prefix=prefix,
+    output:
+        touch("logs/{}_plot_gatc_half_digestion.done".format(prefix))
+    log:
+        "logs/{}_plot_gatc_half_digestion.log".format(prefix)
+    script:
+        "scripts/plot_gatc_half_digestion.py"
+
+# The GATC sites that overlapped with CpG sites are filtered out since 
+# CpG methylation impairs the DpnI digestion, and there are native CpG methylation
+# in human samples.    
+# Adjacent GATC sites are also filtered since read fragments have a lower
+# limit. The pair of half GATC sites with distances < 150 bp are filtered 
+# by default. This distance could be changed in the configuration file.
+
+rule filter_adjacent_gatc_sites:
+    input:
+        "logs/{}_load_gatc_digestion_to_db.done".format(prefix),
+    params:
+        gatc_db=config["data"]["gatc_db"],
+        filter_size=config["data"]["filter_size"],
+        sample_sheet=config["data"]["sample_sheet"],
+        filter_overlap=config["data"]["filter_overlap"]
+    output:
+        touch("logs/{}_filter_adjacent_gatc_sites.done".format(prefix))
+    log:
+        "logs/{}_filter_adjacent_gatc_sites.log".format(prefix)
+    script:
+        "scripts/filter_adjacent_gatc_sites.py"
+
+# Generate the BigWig files from the SQLite database for downstream analysis.
+
+rule process_bw:
+    input:
+        "logs/{}_filter_adjacent_gatc_sites.done".format(prefix)
+    params:
+        gatc_db=config["data"]["gatc_db"],
+        sample_sheet=config["data"]["sample_sheet"],
+        ref_size_sheet=config["reference_size"],
+        bw_prefix=config["data"]["bw_prefix"]
+    output:
+        touch("logs/{}_process_bw.done".format(prefix))
+    log:
+        "logs/{}_process_bw.log".format(prefix)
+    script:
+        "scripts/process_bw.py"     
+

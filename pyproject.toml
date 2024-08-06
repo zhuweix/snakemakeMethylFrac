@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "snakemakeMethylFrac"
+version = "1.0.0"
+description = '''Snakemake workflow to process the raw Illumina reads.
+This workflow is designed to make SLURM scripts for Illumina read alignment.
+We counted the fragment coverage and ends of reads alignments, and calculated
+the methylated fraction at GATC sites. The result stored both in one sqlite database 
+for all samples and BigWig files for individual samples.
+The BigWig files are used for downstream analysis.
+'''
+authors = [
+    {name = "Zhuwei Xu", email="zhuweix8@gmail.com"},
+    ]
+keywords = ["Bioinformatics", "Illumina sequencing", "Dam",
+         "DpnI", "Methylated Fraction"]
+
+readme = "README.md"
+license = {text = "MIT License"}
+
+requires-python = ">=3.11.6"
+dependencies = [
+    "pandas>=2.1.3",
+    "numpy>=1.26.2",
+    "matplotlib>=3.8.2",
+    "seaborn>=0.13.0",
+    "pyBigWig>=0.3.22",
+    "biopython>=1.81",
+    "snakemake>=7.32.4"
+    ]
+
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+[tool.hatch.build.targets.wheel]
+packages = ["workflow"]
+
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/pypa/sampleproject/issues"
+
+
