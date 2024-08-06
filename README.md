@@ -20,13 +20,13 @@ On the SLURM server, the slurm scripts required that Bowtie 2 and bedtools are i
 To install this package:
 ```
 # First clone this repository
-git clone TBD
+git clone https://github.com/zhuweix/snakemakeMethylFrac.git
 
 
 # Then install the package
-cd TBD
+cd snakemakeMethylFrac
 
-git install .
+pip install .
 ```
 
 
