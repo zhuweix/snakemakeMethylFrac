@@ -66,4 +66,5 @@ Furthermore, this workflow also generated the histogram of Fragment Occupancy an
 The workflow could also be executed step by step. Please refer to te `workflow/Snakefile` for more details.
 
 ## Citation
-TBD
+
+Prajapati, H.K., Xu, Z., Eriksson, P.R. et al. Nucleosome dynamics render heterochromatin accessible in living human cells. Nat Commun 16, 4577 (2025). https://doi.org/10.1038/s41467-025-59994-7
